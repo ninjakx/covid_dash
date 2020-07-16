@@ -113,13 +113,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reductio/1.0.0/reductio.min.js"></script>
 <!--Plugin JavaScript file-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
-<script src="https://d3js.org/topojson.v2.min.js"></script>
+<script src="http://d3js.org/topojson.v2.min.js"></script>
 
 <!-- <script src="https://d3js.org/d3-array.v1.min.js"></script> -->
 <script src="https://d3js.org/d3-geo.v1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/5.1.5/turf.min.js"></script>
 <!-- <script src="https://unpkg.com/d3-scale-cluster@1.1.2/dist/d3-scale-cluster.min.js"></script> -->
-<script src="https://d3-legend.susielu.com/d3-legend.min.js"></script>
+<script src="http://d3-legend.susielu.com/d3-legend.min.js"></script>
 
 
 <script>
@@ -1869,7 +1869,8 @@ function stateline_chart(data) {
             });
 
             var ctype = d3.select(this).attr('value');
-            selected_case_type = ctype;      
+            selected_case_type = ctype;
+
             $('#pat_header').html('Patient Info. (' + pat_cases[ctype] + ' Cases)');
             $('#cases_header').html('Covid ' + ctype.charAt(0).toUpperCase() + ctype.slice(1) + ' Cases Stats');
             plot_age_bar(pat_cases[ctype]);
@@ -1879,8 +1880,8 @@ function stateline_chart(data) {
             plot_gender_pie(pat_cases[ctype]);
             pieChart.ordinalColors(pat_color[ctype]);
             pieChart.render();
-
-
+            
+            log("=1212:", selected_state, ctype);
             switch (selected_state) {
                 case "top 10 states": {
                     var div = d3.selectAll("g.sub");
@@ -1898,6 +1899,7 @@ function stateline_chart(data) {
                 }
                 default: {
                     line_chart(selected_state, ctype);
+                    // composite.colors(pat_cases[ctype][0])
                     composite.render();
                 }
             }
@@ -1906,7 +1908,7 @@ function stateline_chart(data) {
             composite2.render();
 
             total_cases_type("total" + ctype);
-            total_chart.render();
+            total_chart.render(); 
         });
 
     var intervals = {
@@ -1915,7 +1917,6 @@ function stateline_chart(data) {
     states.forEach(function(state, index) {
         intervals[state] = state;
     });
-
 
     var defint = 'Top 10 states';
     d3.select('#interval').selectAll('option')
