@@ -1,0 +1,1982 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Covid Dashboard</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="https://dc-js.github.io/dc.js/css/dc.css"/>
+    <link rel="stylesheet" type="text/css" href="main.css" media="screen"/>
+
+</head>
+<body>
+
+<div class="container">
+    <div class="chart-holder">
+        <div id="kpi-confirmed" class="kpi-box" , value="confirmed">
+            <div class="label"></div>
+            <div class="value"></div>
+            <div class="description"></div>
+            <div class="chart-caption">&nbsp;&nbsp;&nbsp;Daily new cases</div>
+        </div>
+        <div id="kpi-active" class="kpi-box" , value="active">
+            <div class="label"></div>
+            <div class="value"></div>
+            <div class="description"></div>
+            <div class="chart-caption">&nbsp;&nbsp;&nbsp;Daily new cases</div>
+        </div>
+        <div id="kpi-recovery" class="kpi-box" , value="recovered">
+            <div class="label"></div>
+            <div class="value"></div>
+            <div class="description"></div>
+            <div class="chart-caption">&nbsp;&nbsp;&nbsp;Daily new cases</div>
+        </div>
+        <div id="kpi-deceased" class="kpi-box" , value="deaths">
+            <div class="label"></div>
+            <div class="value"></div>
+            <div class="description"></div>
+            <div class="chart-caption">&nbsp;&nbsp;&nbsp;Daily new cases</div>
+        </div>
+    </div>
+</div>
+<div id="tooltip" class="hidden">
+    <p><strong id="header"></strong> </p>
+    <p><span id="value"></span> </p>
+</div>
+<div id="ui"></div>
+<button type="button" id="combined_button">View All</button>
+<div class="container">
+    <div id="cases_header" class="header_col">Covid Cases Stats</div>
+    <div class="chart-holder">
+        <div class="column">
+            <div class="chart-title"> <span style="font-size: 1.1em">
+            <strong>Total Cases</strong>
+            <br>
+            </span> </div>
+            <div id="total_cases" class="svg-container"></div>
+        </div>
+        <div class="column">
+            <div class="chart-title"> <span>
+            <strong style="margin-right:10px;">Total Cases Statewise</strong> <select id="interval"></select>
+            <br>
+            </span> </div>
+            <div id="line-chart" class="svg-container"></div>
+        </div>
+        <div class="column">
+            <div class="chart-title"> <span style="font-size: 1.1em">
+                  <strong>Total Cases</strong>
+                  <br>
+              </span> </div>
+            <div id="line-chart2" class="svg-container"></div>
+        </div>
+    </div>
+</div>
+<br>
+<div class="container">
+    <div id="pat_header" class="header_col">Patient Info. (Hospitalized Cases)</div>
+    <div class="chart-holder">
+        <div class="column">
+            <div class="chart-title"> <span>
+                    <strong>Total Cases Statewise</strong>
+                    <a href="javascript:pieChart.filterAll(); barChart2.redraw(); pieChart.redraw()" class="reset">reset</a>
+                    <br>
+                </span> </div>
+            <div id="patients_age" class="svg-container"></div>
+        </div>
+        <div class="column">
+            <div class="chart-title"> <span style="font-size: 1.1em">
+                        <strong>Total Cases</strong>
+                        <a href="javascript:barChart2.filterAll(); barChart2.redraw(); pieChart.redraw()" class="reset">reset</a>
+                        <br>
+                    </span> </div>
+            <div id="patients_gender" class="svg-container"></div>
+        </div>
+        <div id="map_timeline" class="header_col">Covid Spread</div>
+        <div class="chart-holder">
+            <div class="column">
+                <div class="tooltip"></div>
+                <div onload="sizeChange()" id="chart"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="https://dc-js.github.io/dc.js/js/d3.js"></script>
+<script type="text/javascript" src="https://dc-js.github.io/dc.js/js/crossfilter.js"></script>
+<script type="text/javascript" src="https://dc-js.github.io/dc.js/js/dc.js"></script>
+<script type="text/javascript" src="https://dc-js.github.io/dc.js/resizing/dc-restore-transition-duration.js"></script>
+<!--Plugin CSS file with desired skin-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css"/>
+    
+<!--jQuery-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reductio/1.0.0/reductio.min.js"></script>
+<!--Plugin JavaScript file-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
+<script src="http://d3js.org/topojson.v2.min.js"></script>
+
+<!-- <script src="https://d3js.org/d3-array.v1.min.js"></script> -->
+<script src="https://d3js.org/d3-geo.v1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/5.1.5/turf.min.js"></script>
+<!-- <script src="https://unpkg.com/d3-scale-cluster@1.1.2/dist/d3-scale-cluster.min.js"></script> -->
+<script src="http://d3-legend.susielu.com/d3-legend.min.js"></script>
+
+
+<script>
+map_state = {
+    "Andaman and Nicobar Islands": "AN",
+    "Andhra Pradesh": "AP",
+    "Arunachal Pradesh": "AR",
+    "Assam": "AS",
+    "Bihar": "BR",
+    "Chandigarh": "CG",
+    "Chhattisgarh": "CH",
+    "Delhi": "DL",
+    "Goa": "GA",
+    "Gujarat": "GJ",
+    "Haryana": "HR",
+    "Himachal Pradesh": "HP",
+    "Jammu and Kashmir": "HK",
+    "Jharkhand": "JH",
+    "Karnataka": "KA",
+    "Kerala": "KL",
+    "Ladakh": "LD",
+    "Lakshadweep": "LK",
+    "Madhya Pradesh": "MP",
+    "Maharashtra": "MH",
+    "Manipur": "MN",
+    "Meghalaya": "MH",
+    "Mizoram": "MZ",
+    "Nagaland": "NL",
+    "Odisha": "OD",
+    "Puducherry": "PY",
+    "Punjab": "PB",
+    "Rajasthan": "RJ",
+    "Tamil Nadu": "TN",
+    "Telangana": "TS",
+    "Tripura": "TR",
+    "Sikkim": "SK",
+    "Uttar Pradesh": "UP",
+    "Uttarakhand": "UK",
+    "West Bengal": "WB",
+
+}
+
+var log = console.log;
+const lang = 'en-US';
+
+function dateToTS(date) {
+    return date.valueOf();
+}
+
+function tsToDate(ts) {
+    const d = new Date(ts);
+
+    return d.toLocaleDateString(lang, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+}
+
+function filterData(dt, from, to, formatReq) {
+    if (!formatReq) {
+        dt = dateToTS(new Date(dt));
+    } else {
+        const parts = dt.split('/');
+        dt = new Date(
+            parts[1] + '-' + parts[0] + '-' + parts[2].split(' ')[0]
+        );
+    }
+
+    if (dt >= from && dt <= to) {
+        return true;
+    }
+}
+
+var daily_recov = dc.lineChart("#kpi-recovery");
+var daily_conf = dc.lineChart("#kpi-confirmed");
+var daily_dcsd = dc.lineChart("#kpi-deceased");
+var daily_actv = dc.lineChart("#kpi-active");
+var total_chart = dc.compositeChart("#total_cases");
+var composite = dc.compositeChart("#line-chart");
+var composite2 = dc.barChart("#line-chart2");
+
+var pieChart = dc.pieChart("#patients_age");
+var barChart2 = dc.barChart("#patients_gender");
+
+var age_by_cases, barTypeDimension, binwidth;
+var pieTypeDimension, group1;
+
+function plot_age_bar(type) {
+    barChart2
+        .height(null)
+        .width(null) //give it a width
+        .margins({
+            top: 10,
+            right: 10,
+            bottom: 20,
+            left: 60
+        }) //give it margin left of some number so that the y axis ticks dont cut off
+        .dimension(barTypeDimension)
+        .group(age_by_cases, type)
+        .elasticY(true)
+        .valueAccessor(function(p) {
+            return p.value[type];
+        })
+        .x(d3.scaleLinear().domain([1, 101]))
+        .xUnits(dc.units.fp.precision(binwidth))
+
+        .elasticX(true);
+}
+
+function plot_gender_pie(type) {
+    var val_arr = group1.all()
+    var val_type_count = val_arr[0].value[type] + val_arr[1].value[type]
+
+    pieChart
+        .height(null)
+        .width(null)
+        .dimension(pieTypeDimension)
+        .group(group1, type)
+        .valueAccessor(function(kv) {
+            return kv.value[type] || 0;
+        })
+        .othersGrouper(null)
+        .innerRadius(50)
+        .drawPaths(true)
+        .legend(dc.legend())
+        .label(function(d) {
+            return d.key + ": " + ((d.value[type] / val_type_count) * 100).toFixed(2) + "%";
+        });
+}
+
+Promise.all([
+        d3.json("https://api.covid19india.org/data.json"),
+        d3.json("https://api.rootnet.in/covid19-in/unofficial/covid19india.org/statewise/history"),
+        d3.json("https://api.covid19india.org/raw_data1.json"),
+        d3.json("https://api.covid19india.org/raw_data2.json"),
+        d3.json("https://api.covid19india.org/raw_data3.json"),
+        d3.json("https://api.covid19india.org/raw_data4.json"),
+        d3.json("https://api.covid19india.org/raw_data5.json"),
+        d3.json("https://api.covid19india.org/raw_data6.json"),
+        d3.json("https://api.covid19india.org/raw_data7.json"),
+        d3.json("https://api.covid19india.org/raw_data8.json")
+    ]).then(([data1, data2, p1, p2, p3, p4, p5, p6, p7, p8]) => {
+        var data = data1.cases_time_series;
+
+        var from = new Date(2020, 0, 31);
+        var to = new Date()
+
+        var co = 0,
+            count = 0;
+        for (var start = 0; start <= data.length - 1; start++) {
+
+            var day = new Date(data[start].date + "2020");
+            date = day.toDateString().split(" ")
+            date = date[2] + "-" + date[1] + "-" + date[3]
+            if (new Date(date) <= new Date('2020-03-14')) {
+                conf = parseInt(data[co]['totalconfirmed']);
+                recov = parseInt(data[co]['totalrecovered']);
+                dcsd = parseInt(data[co]['totaldeceased']);
+                actv = conf - recov - dcsd;
+
+                d_conf = parseInt(data[co]['dailyconfirmed']);
+                d_recov = parseInt(data[co]['dailyrecovered']);
+                d_dcsd = parseInt(data[co]['dailydeceased']);
+                d_actv = d_conf - d_recov - d_dcsd;
+                data[co] = {
+                    "day": date,
+                    "daily_confirmed": d_conf,
+                    "daily_recovered": d_recov,
+                    "daily_deceased": d_dcsd,
+                    "daily_active": d_conf - d_recov - d_dcsd
+                };
+
+                data[co]['total'] = {
+                    "confirmed": conf,
+                    "recovered": recov,
+                    "deaths": dcsd,
+                    "active": actv
+                };
+
+                statewise_arr = new Array(35);
+                for (var st = 0; st < 35; st++) {
+                    var state_name = Object.keys(map_state)[st];
+                    statewise_arr[st] = ({
+                        'state': state_name,
+                        "confirmed": 0,
+                        "recovered": 0,
+                        "deaths": 0,
+                        "active": 0
+                    })
+                }
+                data[co]['statewise'] = statewise_arr;
+                count = count + 1;
+            } else {
+                data_add = data2.data.history[co - count + 1];
+                conf = parseInt(data_add['total'].confirmed);
+                recov = parseInt(data_add['total'].recovered);
+                actv = parseInt(data_add['total'].active);
+                dcsd = parseInt(data_add['total'].deaths);
+
+                d_conf = parseInt(data[co]['dailyconfirmed']);
+                d_recov = parseInt(data[co]['dailyrecovered']);
+                d_dcsd = parseInt(data[co]['dailydeceased']);
+                d_actv = d_conf - d_recov - d_dcsd;
+
+                data[co] = {
+                    "day": date,
+                    "daily_confirmed": d_conf,
+                    "daily_recovered": d_recov,
+                    "daily_deceased": d_dcsd,
+                    "daily_active": d_conf - d_recov - d_dcsd
+                };
+
+                data[co]['total'] = {
+                    "confirmed": conf,
+                    "recovered": recov,
+                    "deaths": dcsd,
+                    "active": actv
+                };
+
+                var i = 0;
+                statewise_arr = new Array();
+                for (var st = 0; st < data_add['statewise'].length; st++) {
+                    if (data_add['statewise'][st].state != 'State Unassigned') {
+                        statewise_arr[i] = (data_add['statewise'][st]);
+                        i = i + 1;
+                    }
+                }
+                data[co]['statewise'] = statewise_arr;
+            }
+
+            co = co + 1;
+        }
+        var latest_data = data[data.length - 1];
+
+        var dateList = data.map(function(el) {
+            return new Date(el.day);
+        });
+
+        const startDate = new Date("2020-03-15");
+        const endDate = new Date(Math.max.apply(null, dateList));
+
+        var datas = [p1, p2, p3, p4, p5, p6, p7, p8]
+        var data_mod = new Array();
+
+        for (var dat = 0; dat < 8; dat++) {
+
+            var p_data = datas[dat].raw_data;
+            var co = 0;
+            for (var i = 0; i < p_data.length; i++) {
+
+                if (!(p_data[i].agebracket == "") && !(p_data[i].gender == "") && (['M', 'F'].includes(p_data[i].gender))) {
+                    data_mod.push(p_data[i]);
+                    co = co + 1
+                }
+
+            }
+        }
+
+        const saveResult = function(datetime) {
+            const from = datetime['from'];
+            const to = datetime['to'];
+            const tsDataSliced = data.filter(function(d) {
+                return filterData(d.day, from, to, false);
+            });
+            stateline_chart(tsDataSliced);
+
+            return tsDataSliced;
+        };
+
+        $('#ui').ionRangeSlider({
+            skin: 'round',
+            type: 'double',
+            grid: true,
+            min: dateToTS(startDate),
+            max: dateToTS(endDate),
+            from: dateToTS(startDate),
+            to: dateToTS(endDate),
+            prettify: tsToDate,
+            onChange: saveResult,
+            onFinish: saveResult,
+        });
+
+        data = data.filter(function(d) {
+            return filterData(d.day, dateToTS(startDate), dateToTS(endDate), false);
+        });
+
+        let select_elem = document.querySelector("#chart");
+        select_elem.style.height = "50vh";
+        select_elem.style.width = "32.6vw";
+
+        stateline_chart(data);
+        patients_info(data_mod);
+        conf_map();
+    })
+    .catch(error => log('error', error))
+
+
+d3.select(window)
+    .on("resize", sizeChange);
+
+function hexToRGB(hex, alpha) {
+    var r = parseInt(hex.slice(1, 3), 16),
+        g = parseInt(hex.slice(3, 5), 16),
+        b = parseInt(hex.slice(5, 7), 16);
+
+    if (alpha) {
+        return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
+    } else {
+        return "rgb(" + r + ", " + g + ", " + b + ")";
+    }
+}
+
+function sizeChange() {
+    // d3.select("g").attr("transform", "scale("+$("#chart").width()/ $("#chart").height() *1.4 + ")");
+    d3.select("#chart g").attr("transform", "scale(1)");
+    $("#chart svg").height($("#chart").height());
+    $("#chart svg").width($("#chart").width())
+}
+
+
+function conf_map() {
+
+    d3.json("https://api.covid19india.org/v2/state_district_wise.json").then(function(data) {
+
+
+        var w = $("#chart").width();
+        var h = $("#chart").height();
+
+        var proj = d3.geoMercator();
+        var path = d3.geoPath().projection(proj);
+        var t = proj.translate(); // the projection's default translation
+        var s = proj.scale() // the projection's default scale
+
+        colors = ["#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"]; // alternatively 
+
+        var map = d3.select("#chart")
+
+        const zoom = d3.zoom()
+            .scaleExtent([1, 40])
+            .extent([
+                [0, 0],
+                [w, h]
+            ])
+            .on("zoom", zoomed);
+
+        const svg = map.append("svg:svg")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .call(zoom);
+
+        const india = svg.append("g").attr("id", "india");
+        india.style("stroke", "#101010")
+            .style("stroke-width", "0.6");
+
+        function zoomed() {
+            india.attr("transform", d3.event.transform);
+        }
+        var div = d3.select(".tooltip");
+
+        d3.json("https://raw.githubusercontent.com/covid19india/covid19india-react/master/public/maps/india.json").then(function(json) {
+            var pc = topojson.feature(json, json.objects['districts'])
+
+            var fixed = pc.features;
+
+            proj.fitSize([$("#chart").width(), $("#chart").height()], {
+                "type": "FeatureCollection",
+                "features": fixed
+            })
+
+
+            var count = 0;
+            var count_exist = 0;
+
+            conf_val = new Set();
+            var max_conf = 0;
+
+            for (var i = 0; i < data.length; i++) {
+                var state_name = data[i].state;
+                var state_code = data[i].statecode;
+
+                var district = data[i].districtData;
+
+                for (var j = 0; j < district.length; j++) {
+                    var district_name = district[j].district;
+                    if (district_name != 'Unknown') {
+
+                        var dataState = state_name;
+                        var dataPCName = district_name;
+                        var district_conf_val = district[j].confirmed
+                        conf_val.add(district_conf_val);
+
+                        var state_name_res = state_name.toUpperCase();
+                        count_exist = count_exist + 1;
+
+                        for (var k = 0; k < fixed.length; k++) {
+
+                            var jsonState = fixed[k].properties.st_nm;
+                            var jsonPCNo = fixed[k].properties.district;
+
+                            if (state_name_res == jsonState.toUpperCase() && dataPCName == jsonPCNo) {
+
+                                count = count + 1;
+                                fixed[k].properties.confirmed = district_conf_val;
+
+                                if (district_conf_val > max_conf) {
+                                    max_conf = district_conf_val;
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            var maxTotal = 100;
+            var svg = d3.select("#chart svg");
+
+            // create a list of keys
+            var keys = ["0 Case", "Only 1 Case", "< 50 Cases", "< 100 Cases", "< 500 Cases", "< 1,000 Cases", " < 5,000 Cases", "< 10,000 Cases", ">= 10,000 Cases"];
+
+            var colour = ['#FDEDEC', '#FADBD8', '#F5B7B1', '#F1948A', '#E74C3C', '#CB4335', '#B03A2E', '#78281F', '#591d16']
+            // Usually you have a color scale in your chart already
+            var color = d3.scaleOrdinal()
+                .domain(keys)
+                .range(colour);
+
+            domain = Array.from(conf_val).sort(function(a, b) {
+                return a - b;
+            });
+
+            var colors = ['#FDEDEC', '#FADBD8', '#F5B7B1', '#F1948A', '#E74C3C', '#CB4335', '#B03A2E', '#78281F', '#591d16'];
+
+            var colorScale = d3.scaleThreshold()
+                .domain([1, 50, 100, 500, 1000, 2000, 5000, 10000])
+                .range(colors);
+
+            svg.append("g")
+                .attr("class", "legendLog")
+                .attr("transform", "translate(250,20)");
+
+
+            var logLegend = d3.legendColor()
+                .shapeHeight(10)
+                // .shapePadding(10)
+                .labels(d3.legendHelpers.thresholdLabels)
+                .scale(colorScale)
+                .labelFormat(d3.format(",.0f"))
+                .cells([0, 10, 1000, 10000, 100000, 300000]);
+
+
+            svg.select(".legendLog")
+                .call(logLegend);
+
+            var size = "0.2vw";
+            var rect = svg.select(".legendCells").selectAll("g");
+
+            rect.each(function(d) {
+                d3.select(this).select('rect')
+                    .attr("width", "1.5vw")
+                    .attr("height", "1.5vh")
+                    .attr("x", "3.5vw")
+                    .attr("y", "30vh")
+                    .style("fill", function(d) {
+                        return color(d)
+                    })
+                    .on('mouseover', function(d, i) {
+                        rects = india.selectAll('path');
+                        rects.each(function() {
+                            var r = d3.select(this);
+                            if (r.style('fill') != hexToRGB(color(d))) {
+                                r.style('fill', "white");
+                                // 
+                            }
+
+                        })
+                    })
+
+                    .on('mouseleave', function(d, i) {
+
+                        india.selectAll("path")
+                            .style("fill", function(d) {
+                                return colorScale(d.properties.confirmed);
+                            })
+                        d3.select(this).style('outline', 'none');
+                    });
+
+                d3.select(this).select('text')
+                    .attr("width", "1.5vw")
+                    .attr("height", "1.5vh")
+                    .attr("x", "4vw")
+                    .attr("y", "30vh")
+            }); //and so on
+
+            india.selectAll("path")
+                .data(fixed)
+                .enter().append("path")
+                .attr("d", path)
+                .style("fill", "#ffffd9")
+
+                .on('mouseleave', function(d, i) {
+                    div.transition().duration(300)
+                        .style("opacity", 0);
+                })
+                .on('mouseenter', function(d, i) {
+                    div.transition().duration(300)
+                        .style("opacity", 1);
+
+                })
+                .on('mouseover', function(d, i) {
+                    // Highlight hovered province
+                    d3.select(this).style('fill', 'orange');
+                    d3.select(this).transition().duration(300).style("opacity", 1);
+                    div.transition().duration(300)
+                        .style("opacity", 1)
+                    div.html('<strong>' + d.properties.st_nm + '</strong>' + '<br>' + d.properties.district + ': ' + d.properties.confirmed)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.mouse(d3.event.target)[1]) + "px")
+                        .style("position", "absolute")
+                        .style("color", "#222")
+                        .style("background", "#FFF")
+                        .style("box-shadow", "0px 0px 2px 0px #a6a6a6")
+                        .style("border-radius", "2px")
+                        .style("pointer-events", "none")
+                        .style("padding", "0.5rem");
+                })
+                .on('mouseout', function(d, i) {
+                    d3.select(this).style('fill', colorScale(d.properties.confirmed));
+                });
+
+            india.selectAll("path")
+                .style("fill", function(d) {
+                    return colorScale(d.properties.confirmed);
+                });
+        });
+
+    });
+}
+
+
+const callback = chart => entries => {
+    redraw_chart_no_transitions(
+        chart
+        .width(null)
+        .height(null)
+        // .rescale()
+    );
+};
+
+
+function patients_info(data_mod) {
+    cf_p = crossfilter(data_mod);
+    pieTypeDimension = cf_p.dimension(function(d) {
+        return d.gender
+    });
+
+
+    // This will give histogram for overall  
+    binwidth = 10;
+    barTypeDimension = cf_p.dimension(function(d) {
+        return binwidth * Math.floor(parseInt(d.agebracket) / binwidth);
+    });
+
+    age_by_cases = barTypeDimension.group().reduce(
+        // add
+        (p, v) => {
+
+            p[v.currentstatus] = (p[v.currentstatus] || 0) + 1;
+            return p;
+        },
+        // remove
+        (p, v) => {
+            p[v.currentstatus] -= 1;
+            return p;
+        },
+        // init
+        () => ({})
+    );
+
+
+    group1 = pieTypeDimension.group().reduce(
+        function(p, v) { // add
+            p[v.currentstatus] = (p[v.currentstatus] || 0) + 1;
+            return p;
+        },
+        function(p, v) { // remove
+            p[v.currentstatus] -= 1;
+            return p;
+        },
+        function() { // initial
+            return {};
+        });
+
+
+    function plot_gender_pie(type) {
+        var val_arr = group1.all()
+        var val_type_count = val_arr[0].value[type] + val_arr[1].value[type]
+        pieChart
+            .height(null)
+            .width(null)
+            .dimension(pieTypeDimension)
+            .group(group1, type)
+            .valueAccessor(function(kv) {
+                // log("kv:", kv);
+                return kv.value[type] || 0;
+            })
+            .othersGrouper(null)
+            .innerRadius(50)
+            .drawPaths(true)
+            .legend(dc.legend())
+            .label(function(d) {
+                return d.key + ": " + ((d.value[type] / val_type_count) * 100).toFixed(2) + "%";
+            });
+    }
+
+    plot_gender_pie("Hospitalized");
+    pieChart.ordinalColors(['red', '#ff7063']);
+    pieChart.render();
+
+
+    plot_age_bar("Hospitalized");
+    barChart2.colors("#f44334");
+    barChart2.render();
+
+    new ResizeObserver(callback(pieChart)).observe(d3.select('#patients_age').node());
+    new ResizeObserver(callback(barChart2)).observe(d3.select('#patients_gender').node());
+}
+
+
+function stateline_chart(data) {
+
+    cf = crossfilter(data); // Main crossfilter object
+    var cases_bar_d = cf.dimension(function(d) {
+        return new Date(d.day)
+    });
+
+    var daily_cases_bar_g = cases_bar_d.group().reduce(
+        // add
+        (p, v) => {
+            p['dailyconfirmed'] = v.daily_confirmed || 0;
+            p['dailyrecovered'] = v.daily_recovered || 0;
+            p['dailydeaths'] = v.daily_deceased || 0;
+            p['dailyactive'] = v.daily_active || 0;
+
+            return p;
+        },
+        // remove
+        (p, v) => {
+            p['dailyconfirmed'] -= v.daily_confirmed;
+            p['dailyrecovered'] -= v.daily_recovered;
+            p['dailydeaths'] -= v.daily_deceased;
+            p['dailyactive'] -= v.daily_active;
+            return p;
+        },
+        // init
+        () => ({})
+    );
+
+    var cases_bar_g = cases_bar_d.group().reduce(
+        // add
+        (p, v) => {
+            v.statewise.forEach(({
+                state,
+                confirmed
+            }) => p[state] = (p[state] || 0) + confirmed);
+            return p;
+        },
+        // remove
+        (p, v) => {
+            v.statewise.forEach(({
+                state,
+                confirmed
+            }) => p[state] -= confirmed);
+            return p;
+        },
+        // init
+        () => ({})
+    );
+
+
+    var active_cases_bar_g = cases_bar_d.group().reduce(
+        // add
+        (p, v) => {
+            v.statewise.forEach(({
+                state,
+                confirmed,
+                recovered
+            }) => p[state] = (p[state] || 0) + (confirmed - recovered));
+            return p;
+        },
+        // remove
+        (p, v) => {
+            v.statewise.forEach(function({
+                state,
+                confirmed,
+                recovered
+            }) {
+                p[state] -= (confirmed - recovered)
+            });
+            return p;
+        },
+        // init
+        () => ({})
+    );
+
+
+    var recovered_cases_bar_g = cases_bar_d.group().reduce(
+        // add
+        (p, v) => {
+            v.statewise.forEach(({
+                state,
+                recovered
+            }) => p[state] = (p[state] || 0) + recovered);
+            return p;
+        },
+        // remove
+        (p, v) => {
+            v.statewise.forEach(({
+                state,
+                recovered
+            }) => p[state] -= recovered);
+            return p;
+        },
+        // init
+        () => ({})
+    );
+
+    var death_cases_bar_g = cases_bar_d.group().reduce(
+        // add
+        (p, v) => {
+            v.statewise.forEach(({
+                state,
+                deaths
+            }) => p[state] = (p[state] || 0) + deaths);
+            return p;
+        },
+        // remove
+        (p, v) => {
+            v.statewise.forEach(({
+                state,
+                deaths
+            }) => p[state] -= deaths);
+            return p;
+        },
+        // init
+        () => ({})
+    );
+
+
+    var total_cases_bar_g = cases_bar_d.group().reduce(
+        // add
+        (p, v) => {
+            p['totalconfirmed'] = v.total.confirmed || 0;
+            p['totalrecovered'] = v.total.recovered || 0;
+            p['totaldeaths'] = v.total.deaths || 0;
+            p['totalactive'] = v.total.active || 0;
+
+            return p;
+        },
+        // remove
+        (p, v) => {
+            p['totalconfirmed'] -= v.total.confirmed;
+            p['totalrecovered'] -= v.total.recovered;
+            p['totaldeaths'] -= v.total.deaths;
+            p['totalactive'] -= v.total.active;
+            return p;
+        },
+        // init
+        () => ({})
+    );
+
+    const states = data[0].statewise.map(d => d.state);
+
+    var dateList = data.map(function(el) {
+        return new Date(el.day);
+    });
+    var latest_data = data[data.length - 1];
+    var top_states = latest_data.statewise;
+
+    const sDate = new Date(dateList[0]);
+    const eDate = new Date(dateList[dateList.length - 1]);
+
+    var selected_state = "top 10 states",
+        selected_case_type = "confirmed";
+    var charts_cases_type = {
+        confirmed: cases_bar_g,
+        active: active_cases_bar_g,
+        recovered: recovered_cases_bar_g,
+        deaths: death_cases_bar_g
+    };
+
+    var colorScales = [
+        d3.scaleOrdinal(d3.schemeCategory10),
+        d3.scaleOrdinal(d3.schemeSet3)
+    ];
+
+
+    function drawLegendToggles(chart) {
+        chart.selectAll('g.dc-legend .dc-legend-item')
+            .style('opacity', function(d, i) {
+                var subchart = chart.select('g.sub._' + i);
+                var visible = subchart.style('visibility') !== 'hidden';
+                return visible ? 1 : 0.2;
+            });
+    }
+
+    function legendToggle(chart) {
+
+        chart.selectAll('g.dc-legend .dc-legend-item')
+            .on('click.hideshow', function(d, i) {
+                var subchart = chart.select('g.sub._' + i);
+                var visible = subchart.style('visibility') !== 'hidden';
+                subchart.style('visibility', function() {
+                    return visible ? 'hidden' : 'visible';
+                });
+                drawLegendToggles(chart);
+            })
+        drawLegendToggles(chart);
+    }
+
+
+    function find_max(state, case_type) {
+        var max_case = charts_cases_type[case_type].top(Infinity);
+        var max = 0,
+            val;
+        for (var j = 0; j < max_case.length; j++) {
+            val = max_case[j].value[state];
+            if (max <= val) {
+                max = val;
+            }
+        }
+        return max;
+    }
+
+
+    $(document).ready(
+        function() {
+            $('#kpi-confirmed .label').text('Confirmed');
+            $('#kpi-confirmed .value').html(latest_data.total.confirmed);
+            $('#kpi-confirmed .value').append('<span class="diff">(&nbsp;+' + latest_data.daily_confirmed + '&nbsp;)</span>');
+            $('#kpi-active .label').text('Active');
+            $('#kpi-active .value').text(latest_data.total.active);
+            $('#kpi-active .value').append('<span class="diff">(&nbsp;+' + latest_data.daily_active + '&nbsp;)</span>')
+
+            $('#kpi-recovery .label').text('Recovered');
+            $('#kpi-recovery .value').text(latest_data.total.recovered);
+            $('#kpi-recovery .value').append('<span class="diff">(&nbsp;+' + latest_data.daily_recovered + '&nbsp;)</span>')
+
+            $('#kpi-deceased .label').text('Deaths');
+            $('#kpi-deceased .value').text(latest_data.total.deaths);
+            $('#kpi-deceased .value').append('<span class="diff">(&nbsp;+' + latest_data.daily_deceased + '&nbsp;)</span>')
+        }
+    );
+
+
+    let select_elem = document.querySelector("#interval");
+    select_elem.style.backgroundColor = "DodgerBlue";
+    select_elem.style.borderColor = "#fff transparent transparent transparent";
+    select_elem.style.color = "white";
+    select_elem.style.borderRadius = "10px";
+
+    function dailyconf() {
+        daily_conf
+            .width(null)
+            .height(null)
+            .margins({
+                top: 0,
+                right: 0,
+                bottom: -1,
+                left: -1
+            })
+
+            .transitionDuration(500)
+            .dimension(cases_bar_d)
+            .group(daily_cases_bar_g, "dailyconfirmed")
+            .valueAccessor(function(d) {
+                return d.value['dailyconfirmed'];
+            })
+            .renderArea(true)
+            .elasticY(true)
+            .elasticX(true)
+            .colors("red")
+            .brushOn(false)
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]));
+
+        return daily_conf;
+    }
+
+    dailyconf();
+
+    function dailyrecov() {
+        daily_recov.width(null)
+            .height(null)
+            .margins({
+                top: 0,
+                right: 0,
+                bottom: -1,
+                left: -1
+            })
+
+            .transitionDuration(500)
+            .dimension(cases_bar_d)
+            .group(daily_cases_bar_g, "dailyrecovered")
+            .valueAccessor(function(d) {
+                return d.value['dailyrecovered'];
+            })
+            .renderArea(true)
+            .elasticY(true)
+            .elasticX(true)
+            .colors("#389e05")
+            .brushOn(false)
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]));
+    }
+
+    dailyrecov();
+
+    function dailyactv() {
+        daily_actv.width(null)
+            .height(null)
+            .margins({
+                top: 0,
+                right: 0,
+                bottom: -1,
+                left: -1
+            })
+
+            .transitionDuration(500)
+            .dimension(cases_bar_d)
+            .group(daily_cases_bar_g, "dailyactive")
+            .valueAccessor(function(d) {
+                return d.value['dailyactive'];
+            })
+            .renderArea(true)
+            .elasticY(true)
+            .elasticX(true)
+            .colors("#1876d3")
+            .brushOn(false)
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]));
+    }
+
+    dailyactv();
+
+    function dailydcsd() {
+        daily_dcsd.width(null)
+            .height(null)
+            .margins({
+                top: 0,
+                right: 0,
+                bottom: -1,
+                left: -1
+            })
+
+            .transitionDuration(500)
+            .dimension(cases_bar_d)
+            .group(daily_cases_bar_g, "dailydeaths")
+            .valueAccessor(function(d) {
+                return d.value['dailydeaths'];
+            })
+            .renderArea(true)
+            .elasticY(true)
+            .elasticX(true)
+            .colors("#36484f")
+            .brushOn(false)
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]));
+    }
+
+    dailydcsd();
+
+    function total_cases_chart() {
+        total_chart
+            .width(null)
+            .height(null)
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]))
+            .margins({
+                left: 60,
+                top: 1,
+                right: 30,
+                bottom: 30
+            })
+            .brushOn(false)
+            .yAxisLabel("Total Cases")
+            .dimension(cases_bar_d)
+            .elasticY(true)
+            .elasticX(true)
+            // .xUnits(dc.units.ordinal)
+            .compose([
+                dc.lineChart(total_chart)
+                .colors("red")
+                .group(total_cases_bar_g, "totalconfirmed")
+                .valueAccessor(function(d) {
+                    return d.value['totalconfirmed']
+                }),
+                dc.lineChart(total_chart)
+                .colors("#1876d3")
+                .group(total_cases_bar_g, "totalactive")
+                .valueAccessor(function(d) {
+                    return d.value['totalactive']
+                }),
+                dc.lineChart(total_chart)
+                .colors("#389e05")
+                .group(total_cases_bar_g, "totalrecovered")
+                .valueAccessor(function(d) {
+                    return d.value['totalrecovered']
+                }),
+                dc.lineChart(total_chart)
+                .colors("#36484f")
+                .group(total_cases_bar_g, "totaldeaths")
+                .valueAccessor(function(d) {
+                    return d.value['totaldeaths']
+                })
+            ])
+            .legend(dc.legend().x(85).y(15).gap(5).horizontal(false).legendText(function(d) {
+                return d.name;
+            }));
+
+        total_chart.on('pretransition', function(chart) {
+
+            chart.children().forEach(
+                child => child.selectAll('circle.dot')
+                .on('mousemove', null)
+                .on('mouseout', null)
+            );
+
+            chart.xAxis().ticks(8).tickFormat(d3.timeFormat("%d %b"));
+            chart.selectAll("g.x text")
+                .attr('transform', "rotate(30)")
+                .style('text-anchor', 'start')
+                .style('font-weight', 'bold');
+            chart.selectAll("g.y text")
+                .style('font-weight', 'bold');
+        });
+
+        total_chart.renderTitle(false);
+
+        total_chart.on('postRender', chart => {
+            chart.svg().on('mousemove', () => {
+                // find closest data point
+                const x = chart.x().invert(d3.mouse(chart.svg().node())[0] - chart.margins().left),
+                    xs = chart.children()[0].group().all().map(kv => kv.key),
+                    right = d3.bisectLeft(xs, x);
+                const y = chart.y().invert(d3.mouse(chart.svg().node())[1]);
+                let closest = right;
+                if (right >= xs.length)
+                    closest = right - 1;
+                else if (right > 0) {
+                    // see if point to the left is closer
+                    if (x - xs[right - 1] < xs[right] - x)
+                        closest = right - 1;
+                }
+
+
+                var closest_y = 10000000;
+                var ch_y;
+                var chart_count = 0;
+                chart.children().forEach(child => {
+                    child.g().selectAll('circle.dot').each(function(d) {
+                        child._hideDot(d3.select(this));
+                        if (d.x === xs[closest]) {
+
+                            var diff = Math.abs(d3.mouse(d3.event.target)[1] - child.y()(d.y));
+                            if (closest_y >= diff) {
+                                closest_y = diff;
+                                ch_y = child.y()(d.y);
+                            }
+                            child._showDot(d3.select(this));
+                            if (chart_count == 3) {
+                                var text_cases = d3.select(this).data()[0]['data'].value;
+                                var tooltip_cases = d3.select("#tooltip")
+                                    //       px distance from left edge of svg
+                                    .style("left", d3.event.pageX - d3.mouse(d3.event.target)[0] + child.x()(d.x) + "px")
+                                    //       px distance from top edge of svg          
+                                    .style("top", d3.event.pageY - d3.mouse(d3.event.target)[1] + ch_y - 40 + "px")
+                                //       update value for label box   
+
+                                //Show the tooltip
+                                tooltip_cases.select("#header").text(x.toDateString());
+                                tooltip_cases.select("#value").html("<div><span style='color:red'>Total Confirmed: </span><strong>" + text_cases['totalconfirmed'] + "</strong><div>" + "<div><span style='color:#1876d3'>Total Active: </span><strong>" + text_cases['totalactive'] + "</strong><div>" + "<div><span style='color:#389e05'>Total Recovered: </span><strong>" + text_cases['totalrecovered'] + "</strong><div>" + "<div><span style='color:#36484f'>Total Deaths: </span><strong>" + text_cases['totaldeaths'] + "</strong><div>");
+                                tooltip_cases.classed("hidden", false);
+                            }
+                        }
+                    });
+                    chart_count = chart_count + 1;
+                })
+            })
+            chart.svg().on('mouseout', () => {
+                chart.children().forEach(child => {
+                    child.g().select('text.data-tip')
+                        .attr('visibility', 'hidden')
+                    child.selectAll('circle.dot').each(function(d) {
+                        child._hideDot(d3.select(this));
+                        d3.select("#tooltip").classed("hidden", true);
+
+                    });
+                })
+            })
+        });
+    }
+
+    total_cases_chart();
+    total_chart.render();
+
+
+    function total_cases_type(case_type) {
+        var cases_color = {
+            'totalconfirmed': 'red',
+            'totalactive': '#1876d3',
+            'totalrecovered': '#389e05',
+            'totaldeaths': '#36484f'
+        };
+
+        total_chart
+            .width(null)
+            .height(null)
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]))
+            .margins({
+                left: 60,
+                top: 1,
+                right: 30,
+                bottom: 30
+            })
+            .brushOn(false)
+            .yAxisLabel("Total Cases")
+            .dimension(cases_bar_d)
+            .elasticY(true)
+            .elasticX(true)
+            // .xUnits(dc.units.ordinal)
+            .compose([
+                dc.lineChart(total_chart)
+                .colors(cases_color[case_type])
+                .group(total_cases_bar_g, case_type)
+                .dimension(cases_bar_d)
+                .valueAccessor(function(d) {
+                    return d.value[case_type]
+                })
+            ])
+            .legend(dc.legend().x(85).y(15).gap(5).horizontal(false).legendText(function(d) {
+                return d.name;
+            }));
+
+        total_chart.on('pretransition', function(chart) {
+            chart.children().forEach(
+                child => child.selectAll('circle.dot')
+                .on('mousemove', null)
+                .on('mouseout', null)
+            );
+
+            chart.xAxis().ticks(8).tickFormat(d3.timeFormat("%d %b"));
+            chart.selectAll("g.x text")
+                .attr('transform', "rotate(30)")
+                .style('text-anchor', 'start')
+                .style('font-weight', 'bold');
+            chart.selectAll("g.y text")
+                .style('font-weight', 'bold');
+        });
+
+        total_chart.renderTitle(false);
+
+        total_chart.on('postRender', chart => {
+            chart.svg().on('mousemove', () => {
+                // find closest data point
+                const x = chart.x().invert(d3.mouse(chart.svg().node())[0] - chart.margins().left),
+                    xs = chart.children()[0].group().all().map(kv => kv.key),
+                    right = d3.bisectLeft(xs, x);
+                const y = chart.y().invert(d3.mouse(chart.svg().node())[1]);
+                let closest = right;
+                if (right >= xs.length)
+                    closest = right - 1;
+                else if (right > 0) {
+                    // see if point to the left is closer
+                    if (x - xs[right - 1] < xs[right] - x)
+                        closest = right - 1;
+                }
+
+
+                var closest_y = 10000000;
+                var ch_y;
+                var chart_count = 0;
+                chart.children().forEach(child => {
+                    child.g().selectAll('circle.dot').each(function(d) {
+                        child._hideDot(d3.select(this));
+                        if (d.x === xs[closest]) {
+                            var diff = Math.abs(d3.mouse(d3.event.target)[1] - child.y()(d.y));
+                            if (closest_y >= diff) {
+                                closest_y = diff;
+                                ch_y = child.y()(d.y);
+                            }
+
+                            child._showDot(d3.select(this)); {
+                                var text_cases = d3.select(this).data()[0]['data'].value;
+                                var tooltip_cases = d3.select("#tooltip")
+                                    //       px distance from left edge of svg
+                                    .style("left", d3.event.pageX - d3.mouse(d3.event.target)[0] + child.x()(d.x) + "px")
+                                    //       px distance from top edge of svg          
+                                    .style("top", d3.event.pageY - d3.mouse(d3.event.target)[1] + ch_y - 40 + "px")
+                                //       update value for label box   
+
+                                //Show the tooltip
+                                tooltip_cases.select("#header").text(x.toDateString());
+                                tooltip_cases.select("#value").html("<div><span style=" + `color:${cases_color[case_type]}` + ">" + `${case_type}`.replace(/^(.{5})(.*)$/, "$1 $2").replace(/(^\w|\s\w)/g, m => m.toUpperCase()) + ": </span><strong>" + text_cases[case_type] + "</strong><div>");
+                                tooltip_cases.classed("hidden", false);
+                            }
+                        }
+                    });
+                    chart_count = chart_count + 1;
+                })
+
+            })
+            chart.svg().on('mouseout', () => {
+                chart.children().forEach(child => {
+                    child.g().select('text.data-tip')
+                        .attr('visibility', 'hidden')
+                    child.selectAll('circle.dot').each(function(d) {
+                        child._hideDot(d3.select(this));
+                        d3.select("#tooltip").classed("hidden", true);
+
+                    });
+                })
+            })
+        });
+
+    }
+
+    comp_chart(selected_case_type);
+    composite.render();
+
+    function comp_chart(case_type) {
+        top_states_res = top_states.sort(function(a, b) {
+            return b[case_type] - a[case_type];
+        }).slice(0, 10).map(d => d.state);
+
+        var max_cases = find_max(top_states_res[0], case_type)
+        composite
+            .width(null)
+            .height(null)
+            .margins({
+                left: 55,
+                top: 1,
+                right: 20,
+                bottom: 30
+            })
+            .yAxisLabel("Total Cases")
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]))
+            .y(d3.scaleLinear().domain([0, max_cases * 1.1]))
+            .xUnits(d3.timeDays())
+            .legend(dc.legend().x(85).y(15).itemHeight(13).gap(5))
+            .renderHorizontalGridLines(true)
+            .brushOn(false)
+            .elasticX(true)
+            .elasticY(true)
+            .shareTitle(false)
+            .compose(top_states_res.map(
+                (state, i) => dc.lineChart(composite)
+                .dimension(cases_bar_d)
+                .group(charts_cases_type[case_type], state)
+                .valueAccessor(kv => kv.value[state])
+                .colors(colorScales[0]
+                    (Math.random()))
+                .x(d3.scaleTime().domain([sDate, eDate]))
+                .title(function(d) {
+                    return (d.key.toDateString() + "\n" + state + ': ' + d.value[state])
+                })
+            ));
+
+        composite.on('pretransition', function(chart) {
+            chart.xAxis().ticks(8).tickFormat(d3.timeFormat("%d %b"));
+            chart.selectAll("g.x text")
+                .attr('transform', "rotate(30)")
+                .style('text-anchor', 'start')
+                .style('font-weight', 'bold');
+            chart.selectAll("g.y text")
+                .style('font-weight', 'bold');
+        });
+        composite
+            .on('pretransition.hideshow', legendToggle);
+
+        composite.renderTitle(false);
+
+        composite.on('postRender', chart => {
+
+            var show_tooltip = true;
+            chart.svg().on('mousemove', () => {
+                chart.select('g.dc-legend').on('mousemove', () => {
+                    show_tooltip = false;
+                    d3.select("#tooltip").classed("hidden", true);
+                });
+
+                chart.select('g.dc-legend').on('mouseout', () => {
+                    show_tooltip = true;
+                    d3.select("#tooltip").classed("hidden", false);
+                });
+
+                const x = chart.x().invert(d3.mouse(chart.svg().node())[0] - chart.margins().left),
+                    xs = chart.children()[0].group().all().map(kv => kv.key),
+                    right = d3.bisectLeft(xs, x);
+                const y = chart.y().invert(d3.mouse(chart.svg().node())[1]);
+                let closest = right;
+                if (right >= xs.length)
+                    closest = right - 1;
+                else if (right > 0) {
+                    // see if point to the left is closer
+                    if (x - xs[right - 1] < xs[right] - x)
+                        closest = right - 1;
+                }
+
+
+                if (show_tooltip == true) {
+                    var closest_y = 10000000;
+                    var ch_y;
+                    var chart_count = 0;
+                    chart.children().forEach(child => {
+                        child.g().selectAll('circle.dot').each(function(d) {
+                            child._hideDot(d3.select(this));
+                            if (d.x === xs[closest]) {
+
+                                var diff = Math.abs(d3.mouse(d3.event.target)[1] - child.y()(d.y));
+                                if (closest_y >= diff) {
+                                    closest_y = diff;
+                                    ch_y = child.y()(d.y);
+                                }
+                                child._showDot(d3.select(this));
+                                if (chart_count == 3) {
+                                    var text_cases = d3.select(this).data()[0]['data'].value;
+                                    var legend_info = d3.select("#line-chart").selectAll(".dc-legend-item").data();
+                                    var tooltip_cases = d3.select("#tooltip")
+                                    var str = '';
+                                    for (var i = 0; i < 10; i++) {
+                                        str += "<div><span style=" + `color:${legend_info[i].color}` + ">" + `${legend_info[i].name}` + ": </span><strong>" + `${text_cases[legend_info[i].name]}` + "</strong><div>";
+                                    }
+
+                                    tooltip_cases
+                                        //       px distance from left edge of svg
+                                        .style("left", d3.event.pageX - d3.mouse(d3.event.target)[0] + child.x()(d.x) + "px")
+                                        //       px distance from top edge of svg          
+                                        .style("top", d3.event.pageY - d3.mouse(d3.event.target)[1] + ch_y - 40 + "px");
+
+                                    //Show the tooltip
+                                    tooltip_cases.select("#header").text(x.toDateString());
+                                    tooltip_cases.select("#value").html(str);
+                                    d3.select("#tooltip").classed("hidden", false);
+                                }
+                            }
+                        });
+                        chart_count = chart_count + 1;
+                    })
+
+                }
+            })
+
+            chart.svg().on('mouseout', () => {
+                chart.children().forEach(child => {
+                    child.selectAll('circle.dot').each(function(d) {
+                        child._hideDot(d3.select(this));
+                        d3.select("#tooltip").classed("hidden", true);
+
+                    });
+                })
+            })
+        });
+
+    };
+
+    function line_chart(state, case_type) {
+        var cases_color = {
+            'confirmed': 'red',
+            'active': '#1876d3',
+            'recovered': '#389e05',
+            'deaths': '#36484f'
+        };
+        var state_cases = find_max(state, case_type)
+        composite
+            .width(null)
+            .height(null)
+            .margins({
+                left: 55,
+                top: 1,
+                right: 20,
+                bottom: 30
+            })
+            .yAxisLabel("Total Cases")
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]))
+            .y(d3.scaleLinear().domain([0, state_cases * 1.1]))
+            .xUnits(d3.timeDays())
+            .legend(dc.legend().x(85).y(15).itemHeight(13).gap(5))
+            .renderHorizontalGridLines(true)
+            .brushOn(false)
+            .elasticX(true)
+            .elasticY(true)
+            .shareTitle(false)
+            .compose(
+                [dc.lineChart(composite)
+                    .dimension(cases_bar_d)
+                    .group(charts_cases_type[case_type], state)
+                    .valueAccessor(kv => kv.value[state])
+                    .colors(cases_color[case_type])
+                    .x(d3.scaleTime().domain([sDate, eDate]))
+                    .title(function(d) {
+                        return (d.key.toDateString() + "\n" + state + ': ' + d.value[state])
+                    })
+                ]);
+
+        composite.on('pretransition', function(chart) {
+            chart.xAxis().ticks(8).tickFormat(d3.timeFormat("%d %b"));
+            chart.selectAll("g.x text")
+                .attr('transform', "rotate(30)")
+                .style('text-anchor', 'start')
+                .style('font-weight', 'bold');
+            chart.selectAll("g.y text")
+                .style('font-weight', 'bold');
+        });
+
+        composite.renderTitle(false);
+
+        composite.on('postRender', chart => {
+            chart.svg().on('mousemove', () => {
+                // find closest data point
+                const x = chart.x().invert(d3.mouse(chart.svg().node())[0] - chart.margins().left),
+                    xs = chart.children()[0].group().all().map(kv => kv.key),
+                    right = d3.bisectLeft(xs, x);
+                const y = chart.y().invert(d3.mouse(chart.svg().node())[1]);
+                let closest = right;
+                if (right >= xs.length)
+                    closest = right - 1;
+                else if (right > 0) {
+                    // see if point to the left is closer
+                    if (x - xs[right - 1] < xs[right] - x)
+                        closest = right - 1;
+                }
+
+
+                var closest_y = 10000000;
+                var ch_y;
+                var chart_count = 0;
+                chart.children().forEach(child => {
+                    child.g().selectAll('circle.dot').each(function(d) {
+                        child._hideDot(d3.select(this));
+                        if (d.x === xs[closest]) {
+                            var diff = Math.abs(d3.mouse(d3.event.target)[1] - child.y()(d.y));
+                            if (closest_y >= diff) {
+                                closest_y = diff;
+                                ch_y = child.y()(d.y);
+                            }
+
+                            child._showDot(d3.select(this)); {
+                                var text_cases = d3.select(this).data()[0]['data'].value;
+                                var tooltip_cases = d3.select("#tooltip")
+                                    //       px distance from left edge of svg
+                                    .style("left", d3.event.pageX - d3.mouse(d3.event.target)[0] + child.x()(d.x) + "px")
+                                    //       px distance from top edge of svg          
+                                    .style("top", d3.event.pageY - d3.mouse(d3.event.target)[1] + ch_y - 40 + "px")
+                                //       update value for label box   
+
+                                //Show the tooltip
+                                tooltip_cases.select("#header").text(x.toDateString());
+                                tooltip_cases.select("#value").html("<div><span style=" + `color:${cases_color[case_type]}` + ">" + `${case_type}` + ": </span><strong>" + text_cases[state] + "</strong><div>");
+                                tooltip_cases.classed("hidden", false);
+                            }
+                        }
+                    });
+                    chart_count = chart_count + 1;
+                })
+
+            })
+            chart.svg().on('mouseout', () => {
+                chart.children().forEach(child => {
+                    child.g().select('text.data-tip')
+                        .attr('visibility', 'hidden')
+                    child.selectAll('circle.dot').each(function(d) {
+                        child._hideDot(d3.select(this));
+                        d3.select("#tooltip").classed("hidden", true);
+
+                    });
+                })
+            })
+        });
+
+
+    }
+
+    function daily_chart() {
+        composite2
+            .width(null)
+            .height(null)
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]))
+            .xUnits(function() {
+                return daily_cases_bar_g.all().length
+            })
+            .margins({
+                left: 55,
+                top: 1,
+                right: 30,
+                bottom: 30
+            })
+            .elasticX(true)
+            .elasticY(true)
+            .brushOn(false)
+            .yAxisLabel("Daily Cases")
+            .dimension(cases_bar_d)
+            .centerBar(true)
+            .ordinalColors(['#389e05', '#36484f', 'red'])
+            .group(daily_cases_bar_g, "dailyrecovered")
+            .valueAccessor(function(d) {
+                return d.value['dailyrecovered']
+            })
+            .stack(daily_cases_bar_g, "dailydeaths", function(d) {
+                return d.value['dailydeaths'];
+            })
+            .stack(daily_cases_bar_g, "dailyactive", function(d) {
+                return d.value['dailyactive'];
+            })
+            .legend(dc.legend().x(75).y(15).gap(5).horizontal(false).legendText(function(d) {
+                return d.name;
+            }));
+
+        composite2.on('pretransition', function(chart) {
+            chart.xAxis().ticks(8).tickFormat(d3.timeFormat("%d %b"));
+            chart.selectAll("g.x text")
+                .attr('transform', "rotate(30)")
+                .style('text-anchor', 'start')
+                .style('font-weight', 'bold');
+            chart.selectAll("g.y text")
+                .style('font-weight', 'bold');
+        });
+
+        composite2.renderTitle(false);
+
+        composite2.on('postRender', chart => {
+            var show_tooltip = true;
+            chart.svg().on('mousemove', () => {
+                chart.select('g.dc-legend').on('mousemove', () => {
+                    show_tooltip = false;
+                    d3.select("#tooltip").classed("hidden", true);
+                });
+
+                chart.select('g.dc-legend').on('mouseout', () => {
+                    show_tooltip = true;
+                    d3.select("#tooltip").classed("hidden", false);
+                });
+
+                const x = chart.x().invert(d3.mouse(chart.svg().node())[0] - chart.margins().left),
+                    xs = chart.group().all().map(kv => kv.key),
+                    right = d3.bisectLeft(xs, x);
+                const y = chart.y().invert(d3.mouse(chart.svg().node())[1]);
+                let closest = right;
+                if (right >= xs.length)
+                    closest = right - 1;
+                else if (right > 0) {
+                    // see if point to the left is closer
+                    if (x - xs[right - 1] < xs[right] - x)
+                        closest = right - 1;
+                }
+
+
+                if (show_tooltip == true) {
+                    var chart_count = 0;
+                    var all_rect = d3.selectAll('rect.bar').data();
+                    chart.stack()[2].values.forEach(child => {
+                        if (child["x"] == xs[closest]) {
+                            var case_val = child['data']['value'];
+                            var tooltip_cases = d3.select("#tooltip")
+
+                            tooltip_cases
+                                //       px distance from left edge of svg
+                                .style("left", d3.event.pageX - 200 + "px")
+                                //       px distance from top edge of svg    
+                                .style("top", d3.event.pageY + "px")
+                            // .style("top", d3.event.pageY  - d3.mouse(d3.event.target)[1] + "px") 
+                            tooltip_cases.select("#header").text(x.toDateString());
+                            tooltip_cases.select("#value").html("<div><span style='color:red'>Total Confirmed: </span><strong>" + case_val['dailyconfirmed'] + "</strong><div>" + "<div><span style='color:#1876d3'>Total Active: </span><strong>" + case_val['dailyactive'] + "</strong><div>" + "<div><span style='color:#389e05'>Total Recovered: </span><strong>" + case_val['dailyrecovered'] + "</strong><div>" + "<div><span style='color:#36484f'>Total Deaths: </span><strong>" + case_val['dailydeaths'] + "</strong><div>");
+                            tooltip_cases.classed("hidden", false);
+                        }
+                        chart_count = chart_count + 1;
+                    });
+
+                }
+            })
+
+            chart.svg().on('mouseout', () => {
+                d3.select("#tooltip").classed("hidden", true);
+            });
+        });
+
+    }
+
+    daily_chart();
+    composite2.render();
+
+    function daily_cases_type(case_type) {
+        var cases_color = {
+            'dailyconfirmed': 'red',
+            'dailyactive': '#1876d3',
+            'dailyrecovered': '#389e05',
+            'dailydeaths': '#36484f'
+        };
+        composite2
+            .width(null)
+            .height(null)
+            .x(d3.scaleTime().domain([new Date('15 Mar 2020'), eDate]))
+            .margins({
+                left: 60,
+                top: 1,
+                right: 30,
+                bottom: 30
+            })
+            .brushOn(false)
+            .yAxisLabel("Daily Cases")
+            .dimension(cases_bar_d)
+            .centerBar(true)
+            .elasticX(true)
+            .elasticY(true)
+            .colors(cases_color[case_type])
+            .group(daily_cases_bar_g, case_type)
+            .valueAccessor(function(d) {
+                return d.value[case_type]
+            })
+            .legend(dc.legend().x(75).y(15).gap(5).horizontal(false).legendText(function(d) {
+                return d.name;
+            }));
+
+        composite2.on('pretransition', function(chart) {
+            chart.xAxis().ticks(8).tickFormat(d3.timeFormat("%d %b"));
+            chart.selectAll("g.x text")
+                .attr('transform', "rotate(30)")
+                .style('text-anchor', 'start')
+                .style('font-weight', 'bold');
+            chart.selectAll("g.y text")
+                .style('font-weight', 'bold');
+        });
+
+        composite2.on('postRender', chart => {
+            var show_tooltip = true;
+            chart.svg().on('mousemove', () => {
+                chart.select('g.dc-legend').on('mousemove', () => {
+                    show_tooltip = false;
+                    d3.select("#tooltip").classed("hidden", true);
+                });
+
+                chart.select('g.dc-legend').on('mouseout', () => {
+                    show_tooltip = true;
+                    d3.select("#tooltip").classed("hidden", false);
+                });
+
+                const x = chart.x().invert(d3.mouse(chart.svg().node())[0] - chart.margins().left),
+                    xs = chart.group().all().map(kv => kv.key),
+                    right = d3.bisectLeft(xs, x);
+                const y = chart.y().invert(d3.mouse(chart.svg().node())[1]);
+                let closest = right;
+                if (right >= xs.length)
+                    closest = right - 1;
+                else if (right > 0) {
+                    // see if point to the left is closer
+                    if (x - xs[right - 1] < xs[right] - x)
+                        closest = right - 1;
+                }
+
+
+                if (show_tooltip == true) {
+                    var chart_count = 0;
+                    var all_rect = d3.selectAll('rect.bar').data();
+                    chart.stack()[0].values.forEach(child => {
+                        if (child["x"] == xs[closest]) {
+                            var case_val = child['data']['value'];
+                            var tooltip_cases = d3.select("#tooltip")
+
+                            tooltip_cases
+                                //       px distance from left edge of svg
+                                .style("left", d3.event.pageX - 200 + "px")
+                                //       px distance from top edge of svg    
+                                .style("top", d3.mouse(d3.event.target)[1] + "px")
+                            tooltip_cases.select("#header").text(x.toDateString());
+                            tooltip_cases.select("#value").html("<div><span style=" + `color:${cases_color[case_type]}` + ">" + `${case_type}`.replace(/^(.{5})(.*)$/, "$1 $2").replace(/(^\w|\s\w)/g, m => m.toUpperCase()) + ": </span><strong>" + case_val[case_type] + "</strong><div>");
+
+                            tooltip_cases.classed("hidden", false);
+                        }
+                        chart_count = chart_count + 1;
+                    });
+                }
+            })
+
+            chart.svg().on('mouseout', () => {
+                d3.select("#tooltip").classed("hidden", true);
+            });
+        });
+    }
+    composite2.renderTitle("");
+
+    $('#combined_button').on('click', function() {
+        total_cases_chart();
+        total_chart.render();
+
+        plot_age_bar("Hospitalized");
+        barChart2.colors("red");
+        barChart2.render();
+
+        plot_gender_pie("Hospitalized");
+        pieChart.ordinalColors(['red', '#ff7063']);
+        pieChart.render();
+
+        $('pat_header').text('Patient Info. (Hospitalized Cases)')
+
+        selected_state = 'top 10 states';
+
+        comp_chart('confirmed')
+        composite.margins({
+            left: 65,
+            top: 1,
+            right: 20,
+            bottom: 30
+        })
+        composite.render();
+        daily_chart();
+        composite2.render();
+
+        d3.select('#interval').property('value', 'Top 10 states');
+        d3.selectAll('.kpi-box').each(function() {
+            $(this).css({
+                "box-shadow": "0px 2px 4px 0px rgba(0,0,0,0.2)"
+            });
+        })
+        $('#cases_header').text('Covid Cases Stats');
+    });
+
+    d3.selectAll('.kpi-box') //.select("kpi-confirmed")
+        .on('click', function() {
+
+            var pat_cases = {
+                'confirmed': 'Hospitalized',
+                'active': 'Hospitalized',
+                'deaths': 'Deceased',
+                'recovered': 'Recovered'
+            };
+            var pat_color = {
+                'confirmed': ['red', '#ff7063'],
+                'active': ['red', '#ff7063'],
+                'deaths': ['#223238', '#36484f'],
+                'recovered': ['green', '#389e05']
+            };
+
+            d3.selectAll('.kpi-box').each(function() {
+                $(this).css({
+                    "box-shadow": "0px 2px 4px 0px rgba(0,0,0,0.2)"
+                });
+            })
+
+            $(this).css({
+                "box-shadow": "inset 0 1px 1px #dab6b6, 0 0 8px #da0707"
+            });
+
+            var ctype = d3.select(this).attr('value');
+
+            $('#pat_header').html('Patient Info. (' + pat_cases[ctype] + ' Cases)');
+            $('#cases_header').html('Covid ' + ctype.charAt(0).toUpperCase() + ctype.slice(1) + ' Cases Stats');
+            plot_age_bar(pat_cases[ctype]);
+            barChart2.colors(pat_color[ctype][0]);
+            barChart2.render();
+
+            plot_gender_pie(pat_cases[ctype]);
+            pieChart.ordinalColors(pat_color[ctype]);
+            pieChart.render();
+
+
+            switch (selected_state) {
+                case "top 10 states": {
+                    var div = d3.selectAll("g.sub");
+                    div.style("display", "none");
+                    comp_chart(ctype);
+                    composite.margins({
+                        left: 65,
+                        top: 1,
+                        right: 20,
+                        bottom: 30
+                    })
+
+                    composite.render();
+                    break;
+                }
+                default: {
+                    line_chart(selected_state, ctype);
+                    composite.render();
+                }
+            }
+
+            daily_cases_type("daily" + ctype);
+            composite2.render();
+
+            total_cases_type("total" + ctype);
+            total_chart.render();
+        });
+
+    var intervals = {
+        "Top 10 states": "top 10 states"
+    };
+    states.forEach(function(state, index) {
+        intervals[state] = state;
+    });
+
+
+    var defint = 'Top 10 states';
+    d3.select('#interval').selectAll('option')
+        .data(Object.keys(intervals))
+        .enter().append('option')
+        .text(function(d) {
+            return d;
+        })
+        .attr('selected', function(d) {
+            return d === defint ? '' : null;
+        });
+
+    function setup() {
+        var start_t = window.performance.now();
+
+        var interval_name = d3.select('#interval').nodes()[0].value;
+        var interval = intervals[interval_name];
+        selected_state = interval;
+        switch (interval_name) {
+            case 'Top 10 states':
+                comp_chart(selected_case_type);
+                composite.render();
+                break;
+
+            default:
+                line_chart(interval_name, selected_case_type);
+                composite.margins({
+                    left: 65,
+                    top: 1,
+                    right: 20,
+                    bottom: 30
+                })
+                composite.render();
+                break;
+        }
+    };
+
+    d3.select('#interval').on('change', function() {
+        setup();
+
+    });
+
+    // dc.renderAll();
+    daily_conf.render()
+    daily_actv.render()
+    daily_recov.render()
+    daily_dcsd.render()
+    total_chart.render()
+    composite.render()
+    composite2.render()
+
+    new ResizeObserver(callback(daily_conf)).observe(d3.select('#kpi-confirmed').node());
+    new ResizeObserver(callback(daily_recov)).observe(d3.select('#kpi-recovery').node());
+    new ResizeObserver(callback(daily_actv)).observe(d3.select('#kpi-recovery').node());
+    new ResizeObserver(callback(daily_dcsd)).observe(d3.select('#kpi-deceased').node());
+    new ResizeObserver(callback(total_chart)).observe(d3.select('#total_cases').node());
+    new ResizeObserver(callback(composite2)).observe(d3.select('#line-chart2').node());
+    new ResizeObserver(callback(composite)).observe(d3.select('#line-chart').node());
+
+};
+</script>
+</div>
+</body>
+</html>

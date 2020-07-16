@@ -1,0 +1,366 @@
+body,
+.container {
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#map_timeline {
+    top: 0px;
+    left: 65.8vw;
+    position: absolute;
+    width: 32.8vw;
+}
+
+.header_col {
+    background-color: #292c2f;
+    box-shadow: 0 1px 1px #ccc;
+    padding-top: 0.2%;
+    height: 30px;
+    text-align: center;
+    vertical-align: middle;
+    justify-content: center;
+    color: #ffffff;
+    box-sizing: border-box;
+}
+
+#cases_header {
+    width: 98.6vw;
+}
+
+#pat_header {
+    width: 65.5vw;
+}
+
+.column {
+    background: #fff;
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.2);
+    margin-right: 0.3vw;
+    /*    border-radius: 10px;
+*/
+    /*margin: 5px 5px 5px 5px;*/
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.controls {
+    flex: 0;
+}
+
+.chart-holder {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    min-height: 0;
+}
+
+#kpi-confirmed,
+#kpi-recovery,
+#kpi-active,
+#kpi-deceased {
+    max-height: 20%;
+    max-width: 20%;
+    display: flex;
+    flex: 1;
+    /*background: #fff;*/
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    margin: 5px 5px 5px 5px;
+}
+
+#kpi-confirmed {
+    margin-left: 8%;
+    color: #f44334;
+}
+
+#kpi-active {
+    color: #1876d3;
+}
+
+#kpi-recovery {
+    color: #389e05;
+}
+
+#kpi-deceased {
+    color: #36484f;
+}
+
+.kpi-box .diff {
+    font-size: 1rem;
+}
+
+.kpi-box .value {
+    top: 24px;
+    margin-left: 0.5%;
+    font-size: 1.4rem;
+    font-weight: 800;
+    z-index: 10;
+    position: absolute;
+}
+
+.kpi-box .label {
+    margin-left: 0.5%;
+    color: #000a12;
+    font-size: 0.9rem;
+    font-weight: 800;
+    z-index: 10;
+    position: absolute;
+}
+
+.kpi-box .chart-caption {
+    position: absolute;
+    bottom: 5px;
+    z-index: 13;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+#total_cases,
+#line-chart,
+#line-chart2 {
+    max-height: 20%;
+    max-width: 20%;
+    min-width: 32vw;
+    min-height: 40vh;
+    display: flex;
+    flex: 1;
+    margin: 5px 5.5px;
+}
+
+#tooltip {
+    position: absolute;
+    width: 200px;
+    height: auto;
+    padding: 10px;
+    z-index: 14;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 4px 4px 10px rgba(0, 100, 100, 0.4);
+    pointer-events: none;
+}
+
+#tooltip.hidden {
+    display: none;
+}
+
+#tooltip p {
+    margin: 0;
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.irs--round .irs-grid-text {
+    color: #002bff !important;
+}
+
+.irs--round .irs-grid-pol {
+    background-color: #6644df !important;
+}
+
+.irs--round.irs-with-grid {
+    width: 93% !important;
+    left: 3% !important;
+    margin-bottom: 1%;
+}
+
+.chart-title {
+    margin: 15px 15px;
+}
+
+#combined_button {
+    margin-left: 45%;
+    margin-bottom: 1%;
+    background-color: #2196F3;
+    height: 40px;
+    color: white
+}
+
+#patients_age,
+#patients_gender {
+    max-height: 20%;
+    max-width: 20%;
+    min-width: 32vw;
+    min-height: 40vh;
+    /*max-width: 340px;*/
+    display: flex;
+    flex: 1;
+    margin: 5px 5px;
+    /*   margin-left:2%;
+    margin-right:10%;*/
+}
+
+#vis {
+    height: 20vh;
+}
+
+text {
+    /*       position: absolute; */
+    font-size: 12px;
+    /*       marrgin-left:10px; */
+    font-family: Open Sans, sans-serif;
+}
+
+text.title {
+    /*       position: absolute;
+      top-left:10px; */
+    font-size: 24px;
+    font-weight: 500;
+}
+
+text.subTitle {
+    font-weight: 500;
+    fill: #777777;
+}
+
+text.caption {
+    font-weight: 400;
+    font-size: 14px;
+    fill: #777777;
+}
+
+text.label {
+    font-weight: 600;
+}
+
+text.valueLabel {
+    font-weight: 300;
+}
+
+text.yearText {
+    font-size: 40px;
+    font-weight: 700;
+    opacity: 0.25;
+}
+
+.tick text {
+    fill: #777777;
+}
+
+.xAxis .tick:nth-child(2) text {
+    text-anchor: start;
+}
+
+.tick line {
+    /*         display: none; */
+    shape-rendering: CrispEdges;
+    stroke: #dddddd;
+}
+
+.tick line.origin {
+    stroke: #aaaaaa;
+}
+
+path.domain {
+    display: none;
+}
+
+#play-button {
+    position: absolute;
+    top: 140px;
+    left: 50px;
+    background: #f08080;
+    padding-right: 26px;
+    border-radius: 3px;
+    border: none;
+    color: white;
+    margin: 0;
+    padding: 0 12px;
+    width: 60px;
+    cursor: pointer;
+    height: 30px;
+}
+
+#play-button:hover {
+    background-color: #696969;
+}
+
+.ticks {
+    font-size: 10px;
+}
+
+.track,
+.track-inset,
+.track-overlay {
+    stroke-linecap: round;
+}
+
+.track {
+    stroke: #000;
+    stroke-opacity: 0.3;
+    stroke-width: 10px;
+}
+
+.track-inset {
+    stroke: #dcdcdc;
+    stroke-width: 8px;
+}
+
+.track-overlay {
+    pointer-events: stroke;
+    stroke-width: 50px;
+    stroke: transparent;
+    cursor: crosshair;
+}
+
+.handle {
+    fill: #fff;
+    stroke: #000;
+    stroke-opacity: 0.5;
+    stroke-width: 1.25px;
+}
+
+
+/*   #india {
+      stroke: #101010;
+      stroke-width: .6;
+    }*/
+
+
+/*    .tooltip {
+      position: absolute;
+      text-align: center;
+      padding: 0.5em;
+      font-size: 10px;
+      color: #222;
+      background: #FFF;
+      border-radius: 2px;
+      pointer-events: none;
+      box-shadow: 0px 0px 2px 0px #a6a6a6;
+    }
+*/
+
+.key path {
+    display: none;
+}
+
+.key line {
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.key text {
+    font-size: 10px;
+}
+
+.key rect {
+    stroke-width: .4;
+}
+
+#chart {
+    width: 32.8vw;
+    height: 60vh;
+    /*      position: absolute;
+*/
+}
