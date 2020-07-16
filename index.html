@@ -1869,7 +1869,7 @@ function stateline_chart(data) {
             });
 
             var ctype = d3.select(this).attr('value');
-
+            selected_case_type = ctype;      
             $('#pat_header').html('Patient Info. (' + pat_cases[ctype] + ' Cases)');
             $('#cases_header').html('Covid ' + ctype.charAt(0).toUpperCase() + ctype.slice(1) + ' Cases Stats');
             plot_age_bar(pat_cases[ctype]);
