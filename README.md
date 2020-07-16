@@ -9,8 +9,9 @@ Works best on Desktop/Tablet.
 ## Acknowledgement:
 Special thanks to [Gordon](https://stackoverflow.com/users/676195/gordon) who helped me clearing my doubts and queries with a great explanation.
 
-Note: There may be some bugs which is overlooked by me. Being a non web dev. this is the best I can do :blush:
-
 ![demo](https://raw.githubusercontent.com/ninjakx/corona_dash/master/cdash.gif)
+
+Note: There may be some bugs which are overlooked by me. Being a non web dev this is the best I can do :blush:
+
 
 ### Feel free to contribute.
