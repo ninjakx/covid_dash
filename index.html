@@ -1877,7 +1877,6 @@ function stateline_chart(data) {
             pieChart.ordinalColors(pat_color[ctype]);
             pieChart.render();
             
-            log("=1212:", selected_state, ctype);
             switch (selected_state) {
                 case "top 10 states": {
                     var div = d3.selectAll("g.sub");
@@ -1927,7 +1926,6 @@ function stateline_chart(data) {
 
     function setup() {
         var start_t = window.performance.now();
-
         var interval_name = d3.select('#interval').nodes()[0].value;
         var interval = intervals[interval_name];
         selected_state = interval;
