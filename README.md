@@ -6,3 +6,10 @@ They were using google analytics charts so I have ported all the graphs to d3/dc
 
 Works best on Desktop/Tablet. 
 
+## Acknowledgement:
+Special thanks to [Gordon](https://stackoverflow.com/users/676195/gordon) who helped me clearing my doubts and queries with a great explanation.
+
+Note: There may be some bugs which is overlooked by me. Being a non web dev. this is the best I can do :)
+
+
+### Feel free to contribute.
