@@ -16,4 +16,4 @@ Note: There may be some bugs which are overlooked by me. Being a non web dev thi
 
 ### Feel free to contribute.
 
-Edit: Since there are some changes made in the api. So some of the functionalities won't work including hover info box and filter by label on map.
+## Note: Since there are some changes made in the api so some of the functionalities won't work including hover info box and filter by label on map.
