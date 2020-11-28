@@ -1,5 +1,5 @@
 ## Data:
-Data have been fetched from [https://api.covid19india.org](COVID19-India's API)
+Data have been fetched from [COVID19-India's API](https://api.covid19india.org)
 
 ## Visualization:
 They were using google analytics charts so I have ported all the graphs to d3/dc starting from the scratch and have added more functionality to it.
