@@ -99,7 +99,7 @@
 </div>
 
 
-<script type="text/javascript" src="https://dc-js.github.io/dc.js/js/d3.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.js"></script>
 <script type="text/javascript" src="https://dc-js.github.io/dc.js/js/crossfilter.js"></script>
 <script type="text/javascript" src="https://dc-js.github.io/dc.js/js/dc.js"></script>
 <script type="text/javascript" src="https://dc-js.github.io/dc.js/resizing/dc-restore-transition-duration.js"></script>
@@ -492,7 +492,7 @@ function conf_map() {
 
             conf_val = new Set();
             var max_conf = 0;
-
+            var delhi_val = 0;
             for (var i = 0; i < data.length; i++) {
                 var state_name = data[i].state;
                 var state_code = data[i].statecode;
@@ -506,6 +506,11 @@ function conf_map() {
                         var dataState = state_name;
                         var dataPCName = district_name;
                         var district_conf_val = district[j].confirmed
+                        if (dataState =='Delhi')
+                        {
+                            delhi_val = delhi_val + district_conf_val;
+                        }
+
                         conf_val.add(district_conf_val);
 
                         var state_name_res = state_name.toUpperCase();
@@ -515,11 +520,15 @@ function conf_map() {
 
                             var jsonState = fixed[k].properties.st_nm;
                             var jsonPCNo = fixed[k].properties.district;
-
-                            if (state_name_res == jsonState.toUpperCase() && dataPCName == jsonPCNo) {
-
+                  
+                            if (state_name_res == jsonState.toUpperCase() && dataPCName.endsWith(jsonPCNo)) {
                                 count = count + 1;
                                 fixed[k].properties.confirmed = district_conf_val;
+
+                                if (state_name_res == 'DELHI')
+                                {
+                                    fixed[k].properties.confirmed = delhi_val;
+                                }
 
                                 if (district_conf_val > max_conf) {
                                     max_conf = district_conf_val;
@@ -536,7 +545,7 @@ function conf_map() {
             var svg = d3.select("#chart svg");
 
             // create a list of keys
-            var keys = ["0 Case", "Only 1 Case", "< 50 Cases", "< 100 Cases", "< 500 Cases", "< 1,000 Cases", " < 5,000 Cases", "< 10,000 Cases", ">= 10,000 Cases"];
+            var keys = ["< 100 Cases", "< 1K Cases", "< 2K Cases", "< 5K Cases", "< 10K Cases", "< 20K Cases", " < 50K Cases", "< 1L Cases", ">= 1L Cases"];
 
             var colour = ['#FDEDEC', '#FADBD8', '#F5B7B1', '#F1948A', '#E74C3C', '#CB4335', '#B03A2E', '#78281F', '#591d16']
             // Usually you have a color scale in your chart already
@@ -551,12 +560,12 @@ function conf_map() {
             var colors = ['#FDEDEC', '#FADBD8', '#F5B7B1', '#F1948A', '#E74C3C', '#CB4335', '#B03A2E', '#78281F', '#591d16'];
 
             var colorScale = d3.scaleThreshold()
-                .domain([1, 50, 100, 500, 1000, 2000, 5000, 10000])
+                .domain([100, 1000, 2000, 5000, 10000, 20000, 50000, 100000])
                 .range(colors);
 
             svg.append("g")
                 .attr("class", "legendLog")
-                .attr("transform", "translate(250,20)");
+                .attr("transform", "translate(250,10)");
 
 
             var logLegend = d3.legendColor()
@@ -616,7 +625,6 @@ function conf_map() {
                 .enter().append("path")
                 .attr("d", path)
                 .style("fill", "#ffffd9")
-
                 .on('mouseleave', function(d, i) {
                     div.transition().duration(300)
                         .style("opacity", 0);
@@ -627,6 +635,7 @@ function conf_map() {
 
                 })
                 .on('mouseover', function(d, i) {
+                    // console.log("==>", d, i, d.properties.district, d.properties.confirmed);
                     // Highlight hovered province
                     d3.select(this).style('fill', 'orange');
                     d3.select(this).transition().duration(300).style("opacity", 1);
@@ -1784,7 +1793,7 @@ function stateline_chart(data) {
                                 //       px distance from left edge of svg
                                 .style("left", d3.event.pageX - 200 + "px")
                                 //       px distance from top edge of svg    
-                                .style("top", d3.mouse(d3.event.target)[1] + "px")
+                                .style("top", 400+d3.mouse(d3.event.target)[1] + "px")
                             tooltip_cases.select("#header").text(x.toDateString());
                             tooltip_cases.select("#value").html("<div><span style=" + `color:${cases_color[case_type]}` + ">" + `${case_type}`.replace(/^(.{5})(.*)$/, "$1 $2").replace(/(^\w|\s\w)/g, m => m.toUpperCase()) + ": </span><strong>" + case_val[case_type] + "</strong><div>");
 
