@@ -268,7 +268,7 @@ Promise.all([
             count = 0;
         for (var start = 0; start <= data.length - 1; start++) {
 
-            var day = new Date(data[start].date + "2020");
+            var day = new Date(data[start].date);
             date = day.toDateString().split(" ")
             date = date[2] + "-" + date[1] + "-" + date[3]
             if (new Date(date) <= new Date('2020-03-14')) {
@@ -310,7 +310,11 @@ Promise.all([
                 data[co]['statewise'] = statewise_arr;
                 count = count + 1;
             } else {
+
                 data_add = data2.data.history[co - count + 1];
+                // if (typeof data_add === 'undefined'){
+                // 	break
+                // }
                 conf = parseInt(data_add['total'].confirmed);
                 recov = parseInt(data_add['total'].recovered);
                 actv = parseInt(data_add['total'].active);
@@ -320,7 +324,6 @@ Promise.all([
                 d_recov = parseInt(data[co]['dailyrecovered']);
                 d_dcsd = parseInt(data[co]['dailydeceased']);
                 d_actv = d_conf - d_recov - d_dcsd;
-
                 data[co] = {
                     "day": date,
                     "daily_confirmed": d_conf,
@@ -350,7 +353,6 @@ Promise.all([
             co = co + 1;
         }
         var latest_data = data[data.length - 1];
-
         var dateList = data.map(function(el) {
             return new Date(el.day);
         });
@@ -897,6 +899,7 @@ function stateline_chart(data) {
         () => ({})
     );
 
+     console.log(data);
     const states = data[0].statewise.map(d => d.state);
 
     var dateList = data.map(function(el) {
