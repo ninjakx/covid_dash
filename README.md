@@ -17,3 +17,11 @@ Note: There may be some bugs which are overlooked by me. Being a non web dev thi
 ### Feel free to contribute.
 
 ## Note: Since there are some changes made in the api so some of the functionalities won't work including hover info box and filter by label on map.
+
+### Updates (Apr 29 2021)
+
+The `total cases` and `Statewise Cases` Graphs are having constant values after `26th Oct 2020`. It's due to the Api :
+- https://api.covid19india.org/data.json
+- https://api.rootnet.in/covid19-in/unofficial/covid19india.org/statewise/history
+
+They are storing the same values after october 2020.
