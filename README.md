@@ -25,3 +25,7 @@ The `total cases` and `Statewise Cases` Graphs are having constant values after 
 - https://api.rootnet.in/covid19-in/unofficial/covid19india.org/statewise/history
 
 They are storing the same values after october 2020.
+
+
+### Updates (May 02 2021)
+I guess the bug is due to api itself. No longer working.
