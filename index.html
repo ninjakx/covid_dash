@@ -257,8 +257,26 @@ Promise.all([
         d3.json("https://api.covid19india.org/raw_data5.json"),
         d3.json("https://api.covid19india.org/raw_data6.json"),
         d3.json("https://api.covid19india.org/raw_data7.json"),
-        d3.json("https://api.covid19india.org/raw_data8.json")
-    ]).then(([data1, data2, p1, p2, p3, p4, p5, p6, p7, p8]) => {
+        d3.json("https://api.covid19india.org/raw_data8.json"),
+        d3.json("https://api.covid19india.org/raw_data9.json"),
+        d3.json("https://api.covid19india.org/raw_data10.json"),
+        d3.json("https://api.covid19india.org/raw_data11.json"),
+        d3.json("https://api.covid19india.org/raw_data12.json"),
+        d3.json("https://api.covid19india.org/raw_data13.json"),
+        d3.json("https://api.covid19india.org/raw_data14.json"),
+        d3.json("https://api.covid19india.org/raw_data15.json"),
+        d3.json("https://api.covid19india.org/raw_data16.json"),
+        d3.json("https://api.covid19india.org/raw_data17.json"),
+        d3.json("https://api.covid19india.org/raw_data18.json"),
+        d3.json("https://api.covid19india.org/raw_data19.json"),
+        d3.json("https://api.covid19india.org/raw_data20.json"),
+        d3.json("https://api.covid19india.org/raw_data21.json"),
+        d3.json("https://api.covid19india.org/raw_data22.json"),
+        d3.json("https://api.covid19india.org/raw_data23.json"),
+        d3.json("https://api.covid19india.org/raw_data24.json"),
+        d3.json("https://api.covid19india.org/raw_data25.json"),
+        d3.json("https://api.covid19india.org/raw_data26.json")
+    ]).then(([data1, data2, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26]) => {
         var data = data1.cases_time_series;
 
         var from = new Date(2020, 0, 31);
@@ -313,7 +331,7 @@ Promise.all([
 
                 data_add = data2.data.history[co - count + 1];
                 // if (typeof data_add === 'undefined'){
-                // 	break
+                //  break
                 // }
                 conf = parseInt(data_add['total'].confirmed);
                 recov = parseInt(data_add['total'].recovered);
@@ -360,10 +378,10 @@ Promise.all([
         const startDate = new Date("2020-03-15");
         const endDate = new Date(Math.max.apply(null, dateList));
 
-        var datas = [p1, p2, p3, p4, p5, p6, p7, p8]
+        var datas = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26];
         var data_mod = new Array();
 
-        for (var dat = 0; dat < 8; dat++) {
+        for (var dat = 0; dat < 26; dat++) {
 
             var p_data = datas[dat].raw_data;
             var co = 0;
