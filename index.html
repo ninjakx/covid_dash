@@ -278,9 +278,10 @@ Promise.all([
         d3.json("https://data.covid19india.org/raw_data26.json")
     ]).then(([data1, data2, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26]) => {
         var data = data1.cases_time_series;
+        console.log("====>data:", data)
 
         var from = new Date(2020, 0, 31);
-        var to = new Date()
+        var to = new Date('23 Jul 2021');
 
         var co = 0,
             count = 0;
@@ -333,6 +334,8 @@ Promise.all([
                 // if (typeof data_add === 'undefined'){
                 //  break
                 // }
+                console.log("====>", data_add)
+                if (data_add == null) continue
                 conf = parseInt(data_add['total'].confirmed);
                 recov = parseInt(data_add['total'].recovered);
                 actv = parseInt(data_add['total'].active);
@@ -371,12 +374,13 @@ Promise.all([
             co = co + 1;
         }
         var latest_data = data[data.length - 1];
-        var dateList = data.map(function(el) {
-            return new Date(el.day);
-        });
-
+        // var dateList = data.map(function(el) {
+        //     return new Date(el.day);
+        // });
+        var dateList = new Date('23 Jul 2021');
         const startDate = new Date("2020-03-15");
-        const endDate = new Date(Math.max.apply(null, dateList));
+        const endDate = dateList;
+        //new Date(Math.max.apply(null, dateList));
 
         var datas = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26];
         var data_mod = new Array();
@@ -418,6 +422,7 @@ Promise.all([
             onChange: saveResult,
             onFinish: saveResult,
         });
+        console.log("startDate:", startDate, "==>", endDate);
 
         data = data.filter(function(d) {
             return filterData(d.day, dateToTS(startDate), dateToTS(endDate), false);
@@ -459,7 +464,7 @@ function sizeChange() {
 
 function conf_map() {
 
-    d3.json("https://api.covid19india.org/v2/state_district_wise.json").then(function(data) {
+    d3.json("https://data.covid19india.org/v2/state_district_wise.json").then(function(data) {
 
 
         var w = $("#chart").width();
@@ -779,7 +784,7 @@ function stateline_chart(data) {
 
     cf = crossfilter(data); // Main crossfilter object
     var cases_bar_d = cf.dimension(function(d) {
-        return new Date(d.day)
+        return new Date('23 Jul 2021');
     });
 
     var daily_cases_bar_g = cases_bar_d.group().reduce(
@@ -921,7 +926,8 @@ function stateline_chart(data) {
     const states = data[0].statewise.map(d => d.state);
 
     var dateList = data.map(function(el) {
-        return new Date(el.day);
+        return new Date('23 Jul 2021');
+        // return new Date(el.day);
     });
     var latest_data = data[data.length - 1];
     var top_states = latest_data.statewise;
