@@ -331,9 +331,9 @@ Promise.all([
             } else {
 
                 data_add = data2.data.history[co - count + 1];
-                // if (typeof data_add === 'undefined'){
-                //  break
-                // }
+                if (typeof data_add === 'undefined'){
+                 break
+                }
                 console.log("====>", data_add)
                 if (data_add == null) continue
                 conf = parseInt(data_add['total'].confirmed);
